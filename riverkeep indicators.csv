@@ -1,0 +1,48 @@
+Site,Latitude,Longitude,Theme,Indicator,Unit,Quarter,Value,Metric_Type
+Lower Nkosana Bend,-26.148,28.041,Flood Resilience,Riparian corridor restored,ha,2024-Q1,4.2,cumulative
+Lower Nkosana Bend,-26.148,28.041,Flood Resilience,Riparian corridor restored,ha,2024-Q3,6.8,cumulative
+Lower Nkosana Bend,-26.148,28.041,Flood Resilience,Riparian corridor restored,ha,2025-Q1,9.1,cumulative
+Lower Nkosana Bend,-26.148,28.041,Flood Resilience,Riparian corridor restored,ha,2025-Q3,11.4,cumulative
+Lower Nkosana Bend,-26.148,28.041,Flood Resilience,Riparian corridor restored,ha,2026-Q1,13.0,cumulative
+Lower Nkosana Bend,-26.148,28.041,Flood Resilience,Debris removed,tons,2024-Q1,18,cumulative
+Lower Nkosana Bend,-26.148,28.041,Flood Resilience,Debris removed,tons,2024-Q3,26,cumulative
+Lower Nkosana Bend,-26.148,28.041,Flood Resilience,Debris removed,tons,2025-Q1,31,cumulative
+Lower Nkosana Bend,-26.148,28.041,Flood Resilience,Debris removed,tons,2025-Q3,34,cumulative
+Lower Nkosana Bend,-26.148,28.041,Flood Resilience,Debris removed,tons,2026-Q1,39,cumulative
+Millbrook Confluence,-26.129,28.058,Flood Resilience,Riparian corridor restored,ha,2024-Q1,2.6,cumulative
+Millbrook Confluence,-26.129,28.058,Flood Resilience,Riparian corridor restored,ha,2024-Q3,4.4,cumulative
+Millbrook Confluence,-26.129,28.058,Flood Resilience,Riparian corridor restored,ha,2025-Q1,6.9,cumulative
+Millbrook Confluence,-26.129,28.058,Flood Resilience,Riparian corridor restored,ha,2025-Q3,8.7,cumulative
+Millbrook Confluence,-26.129,28.058,Flood Resilience,Riparian corridor restored,ha,2026-Q1,10.2,cumulative
+Millbrook Confluence,-26.129,28.058,Flood Resilience,Peak flood extent,ha,2024-Q1,142,point_in_time
+Millbrook Confluence,-26.129,28.058,Flood Resilience,Peak flood extent,ha,2025-Q1,121,point_in_time
+Millbrook Confluence,-26.129,28.058,Flood Resilience,Peak flood extent,ha,2026-Q1,98,point_in_time
+Willow Reach,-26.101,28.070,River Health,Water quality index,score 0-100,2024-Q1,54,point_in_time
+Willow Reach,-26.101,28.070,River Health,Water quality index,score 0-100,2024-Q3,58,point_in_time
+Willow Reach,-26.101,28.070,River Health,Water quality index,score 0-100,2025-Q1,64,point_in_time
+Willow Reach,-26.101,28.070,River Health,Water quality index,score 0-100,2025-Q3,69,point_in_time
+Willow Reach,-26.101,28.070,River Health,Water quality index,score 0-100,2026-Q1,73,point_in_time
+Willow Reach,-26.101,28.070,River Health,Native species recorded,count,2024-Q1,19,cumulative
+Willow Reach,-26.101,28.070,River Health,Native species recorded,count,2025-Q1,27,cumulative
+Willow Reach,-26.101,28.070,River Health,Native species recorded,count,2026-Q1,34,cumulative
+Willow Reach,-26.101,28.070,River Health,Urban trees planted,count,2024-Q1,340,cumulative
+Willow Reach,-26.101,28.070,River Health,Urban trees planted,count,2024-Q3,810,cumulative
+Willow Reach,-26.101,28.070,River Health,Urban trees planted,count,2025-Q1,1420,cumulative
+Willow Reach,-26.101,28.070,River Health,Urban trees planted,count,2025-Q3,2050,cumulative
+Willow Reach,-26.101,28.070,River Health,Urban trees planted,count,2026-Q1,2680,cumulative
+Cutler's Ford,-26.163,28.052,River Health,Vegetated cover,percent,2024-Q1,31,point_in_time
+Cutler's Ford,-26.163,28.052,River Health,Vegetated cover,percent,2025-Q1,44,point_in_time
+Cutler's Ford,-26.163,28.052,River Health,Vegetated cover,percent,2026-Q1,55,point_in_time
+Cutler's Ford,-26.163,28.052,Community & Livelihoods,Jobs created (fixed term & temporary),count,2024-Q1,12,cumulative
+Cutler's Ford,-26.163,28.052,Community & Livelihoods,Jobs created (fixed term & temporary),count,2024-Q3,19,cumulative
+Cutler's Ford,-26.163,28.052,Community & Livelihoods,Jobs created (fixed term & temporary),count,2025-Q1,28,cumulative
+Cutler's Ford,-26.163,28.052,Community & Livelihoods,Jobs created (fixed term & temporary),count,2025-Q3,35,cumulative
+Cutler's Ford,-26.163,28.052,Community & Livelihoods,Jobs created (fixed term & temporary),count,2026-Q1,41,cumulative
+Lower Nkosana Bend,-26.148,28.041,Community & Livelihoods,Participants from women's groups,count,2024-Q1,15,cumulative
+Lower Nkosana Bend,-26.148,28.041,Community & Livelihoods,Participants from women's groups,count,2024-Q3,21,cumulative
+Lower Nkosana Bend,-26.148,28.041,Community & Livelihoods,Participants from women's groups,count,2025-Q1,33,cumulative
+Lower Nkosana Bend,-26.148,28.041,Community & Livelihoods,Participants from women's groups,count,2025-Q3,44,cumulative
+Lower Nkosana Bend,-26.148,28.041,Community & Livelihoods,Participants from women's groups,count,2026-Q1,52,cumulative
+Millbrook Confluence,-26.129,28.058,Community & Livelihoods,Trees distributed to homes,count,2024-Q1,60,cumulative
+Millbrook Confluence,-26.129,28.058,Community & Livelihoods,Trees distributed to homes,count,2025-Q1,210,cumulative
+Millbrook Confluence,-26.129,28.058,Community & Livelihoods,Trees distributed to homes,count,2026-Q1,395,cumulative

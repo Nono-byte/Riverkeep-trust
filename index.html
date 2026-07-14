@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Riverkeep Trust — Nkosana River Impact Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg: #EEF1E8;
+    --bg-warm: #E7E4D9;
+    --ink: #17322B;
+    --ink-soft: #3C544C;
+    --teal: #3E8E88;
+    --teal-deep: #23615E;
+    --clay: #A9613C;
+    --moss: #7C8B5C;
+    --gold: #CE9A4A;
+    --line: rgba(23,50,43,0.14);
+    --card: #F7F8F2;
+    --radius: 14px;
+    --maxw: 1120px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Space Grotesk', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+    margin:0;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px;}
+  a{color:inherit;}
+
+  nav{
+    position:sticky; top:0; z-index:40;
+    background:rgba(238,241,232,0.88);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; padding-top:16px; padding-bottom:16px;}
+  .brand{display:flex; align-items:center; gap:10px; font-family:'Fraunces',serif; font-weight:600; font-size:19px;}
+  .brand-mark{width:26px; height:26px; flex:none;}
+  .nav-right{display:flex; align-items:center; gap:18px; font-size:14px;}
+  .lang-toggle{
+    border:1px solid var(--line); background:transparent; color:var(--ink);
+    font-family:'IBM Plex Mono', monospace; font-size:12px; letter-spacing:0.02em;
+    padding:7px 12px; border-radius:999px; cursor:pointer;
+  }
+  .lang-toggle:hover{border-color:var(--teal); color:var(--teal-deep);}
+  .nav-cta{
+    background:var(--ink); color:var(--bg); padding:9px 16px; border-radius:999px;
+    font-size:13.5px; text-decoration:none; white-space:nowrap;
+  }
+
+  header.hero{position:relative; overflow:hidden; padding:76px 0 40px;}
+  .hero-eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:12.5px; letter-spacing:0.09em;
+    text-transform:uppercase; color:var(--teal-deep); margin-bottom:18px; display:block;
+  }
+  .hero h1{font-size:clamp(34px, 5.4vw, 60px); line-height:1.06; max-width:15ch;}
+  .hero p.lede{
+    font-size:18px; line-height:1.55; color:var(--ink-soft); max-width:52ch; margin-top:22px;
+  }
+  .river-svg{position:absolute; right:-60px; top:0; width:52%; height:100%; z-index:0; opacity:0.9;}
+  .hero .wrap{position:relative; z-index:1;}
+
+  .stat-row{
+    display:grid; grid-template-columns:repeat(5,1fr); gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:var(--radius);
+    overflow:hidden; margin-top:52px;
+  }
+  .stat{background:var(--card); padding:22px 20px;}
+  .stat .num{font-family:'Fraunces',serif; font-weight:600; font-size:34px; color:var(--teal-deep);}
+  .stat .lbl{font-size:12.5px; color:var(--ink-soft); margin-top:6px; line-height:1.4;}
+
+  @media (max-width:900px){
+    .stat-row{grid-template-columns:repeat(3,1fr);}
+  }
+  @media (max-width:760px){
+    .stat-row{grid-template-columns:repeat(2,1fr);}
+    .river-svg{display:none;}
+  }
+
+  section{padding:72px 0;}
+  .intro-block{max-width:64ch;}
+  .intro-block p{font-size:16.5px; line-height:1.7; color:var(--ink-soft);}
+
+  .theme-section{
+    position:relative; padding-left:36px; border-left:2px solid var(--line);
+    margin-left:6px; padding-top:8px; padding-bottom:8px;
+  }
+  .theme-section::before{
+    content:""; position:absolute; left:-7px; top:6px; width:12px; height:12px;
+    border-radius:50%; background:var(--teal); border:3px solid var(--bg);
+  }
+  .theme-head{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:6px;}
+  .theme-tag{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--clay); letter-spacing:0.04em;}
+  .theme-head h2{font-size:clamp(24px,3.2vw,32px);}
+  .theme-why{color:var(--ink-soft); font-size:15.5px; line-height:1.65; max-width:60ch; margin-top:10px;}
+
+  .theme-grid{
+    display:grid; grid-template-columns: 1.15fr 1fr; gap:22px; margin-top:28px;
+  }
+  @media (max-width:820px){ .theme-grid{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:20px 22px;
+  }
+  .card h3{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14.5px; color:var(--ink-soft); margin-bottom:14px;}
+  canvas{max-width:100%;}
+
+  .site-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px;}
+  .site-list li{
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:14px; padding:10px 12px; border-radius:9px; background:var(--bg-warm);
+  }
+  .site-list .dot{width:8px; height:8px; border-radius:50%; background:var(--moss); margin-right:8px; display:inline-block;}
+  .site-list .val{font-family:'IBM Plex Mono',monospace; color:var(--teal-deep); font-size:13px;}
+  .caveat{font-size:12.5px; color:var(--ink-soft); margin-top:14px; line-height:1.5;}
+  .caveat::before{content:"Note — "; font-weight:600; color:var(--clay);}
+
+  .bi-section{background:var(--ink); color:var(--bg); border-radius:22px; margin:0 auto; max-width:var(--maxw);}
+  .bi-section .wrap{padding:64px 28px;}
+  .bi-section h2{color:var(--bg); font-size:clamp(24px,3vw,32px);}
+  .bi-section p{color:#B9C7C1; max-width:58ch; line-height:1.7; margin-top:14px; font-size:15.5px;}
+  .bi-embed-slot{
+    margin-top:32px; border:1px dashed rgba(247,248,242,0.35); border-radius:14px;
+    min-height:340px; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono',monospace; font-size:13px; color:#8FA69E; text-align:center; padding:24px;
+  }
+  .bi-embed-wrap{
+    margin-top:32px; border-radius:14px; overflow:hidden;
+    aspect-ratio: 600 / 373.5; width:100%;
+  }
+  .bi-embed-wrap iframe{ width:100%; height:100%; border:0; display:block; }
+
+  .map-card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; margin-top:24px;
+  }
+  #siteMap{
+    width:100%; height:400px; border-radius:9px; z-index:0;
+    filter: sepia(8%) saturate(85%) hue-rotate(-6deg);
+  }
+  .leaflet-popup-content-wrapper{
+    background:var(--card); color:var(--ink); border-radius:10px;
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .leaflet-popup-content b{font-family:'Fraunces',serif; font-size:15px;}
+  .leaflet-popup-tip{background:var(--card);}
+  .map-legend{display:flex; gap:18px; flex-wrap:wrap; margin-top:14px; font-size:12.5px; color:var(--ink-soft);}
+  .map-legend span{display:flex; align-items:center; gap:6px;}
+  .map-legend i{width:10px; height:10px; border-radius:50%; display:inline-block;}
+
+  footer{padding:48px 0 64px; border-top:1px solid var(--line); margin-top:20px;}
+  footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px; font-size:13px; color:var(--ink-soft);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none">
+        <path d="M2 14c3-4 5 4 8 0s5-4 8 0s4 2 4 2" stroke="#3E8E88" stroke-width="2" stroke-linecap="round"/>
+        <path d="M2 19c3-4 5 4 8 0s5-4 8 0s4 2 4 2" stroke="#A9613C" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+      <span>Riverkeep Trust</span>
+    </div>
+    <div class="nav-right">
+      <button class="lang-toggle" id="langBtn">EN / ZU</button>
+      <a class="nav-cta" href="#funders" data-en="For funders" data-zu="Kubaxhasi">For funders</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <svg class="river-svg" viewBox="0 0 500 700" preserveAspectRatio="none">
+    <path d="M420 0 C 300 90, 380 160, 260 230 S 180 340, 300 400 S 420 500, 280 560 S 160 650, 220 700"
+          fill="none" stroke="#3E8E88" stroke-width="26" stroke-linecap="round" opacity="0.16"/>
+    <path d="M420 0 C 300 90, 380 160, 260 230 S 180 340, 300 400 S 420 500, 280 560 S 160 650, 220 700"
+          fill="none" stroke="#23615E" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+  </svg>
+  <div class="wrap">
+    <span class="hero-eyebrow" data-en="Nkosana River · Rivermead" data-zu="Umfula Nkosana · Rivermead">Nkosana River · Rivermead</span>
+    <h1 data-en="What the river is telling us this year." data-zu="Lokho umfula osikutshelayo kulo nyaka.">What the river is telling us this year.</h1>
+    <p class="lede" data-en="Since 2024, Riverkeep Trust has restored riparian habitat, reduced flood risk, and created local jobs along four sites on the Nkosana River. This dashboard tracks what's actually changed — for residents, for the river, and for the funders making it possible."
+       data-zu="Kusukela ngo-2024, i-Riverkeep Trust ibuyisele indawo yemvelo yasemfuleni, yehlisa ubungozi bezikhukhula, futhi yadala amathuba emisebenzi endaweni ezine ngasemfuleni i-Nkosana. Le dashboard ilandelela ushintsho olwenzekile ngempela.">
+      Since 2024, Riverkeep Trust has restored riparian habitat, reduced flood risk, and created local jobs along four sites on the Nkosana River. This dashboard tracks what's actually changed — for residents, for the river, and for the funders making it possible.
+    </p>
+
+    <div class="stat-row">
+      <div class="stat">
+        <div class="num mono" id="statRiparian">—</div>
+        <div class="lbl" data-en="Hectares of riparian corridor restored — cumulative, 2026 Q1" data-zu="Amahektha omfula abuyiselwe — isamba, 2026 Q1">Hectares of riparian corridor restored — cumulative, 2026 Q1</div>
+      </div>
+      <div class="stat">
+        <div class="num mono" id="statFlood">—</div>
+        <div class="lbl" data-en="% reduction in peak flood extent, Millbrook" data-zu="% yokwehla kwezikhukhula, Millbrook">% reduction in peak flood extent, Millbrook</div>
+      </div>
+      <div class="stat">
+        <div class="num mono" id="statTrees">—</div>
+        <div class="lbl" data-en="Urban trees planted — cumulative total, 2026 Q1" data-zu="Izihlahla ezitshaliwe — isamba, 2026 Q1">Urban trees planted — cumulative total, 2026 Q1</div>
+      </div>
+      <div class="stat">
+        <div class="num mono" id="statJobs">—</div>
+        <div class="lbl" data-en="Jobs created — cumulative, 2026 Q1" data-zu="Imisebenzi edaliwe — isamba, 2026 Q1">Jobs created — cumulative, 2026 Q1</div>
+      </div>
+      <div class="stat">
+        <div class="num mono" id="statParticipants">—</div>
+        <div class="lbl" data-en="Women's-group participants — cumulative, 2026 Q1" data-zu="Ababambe iqhaza amaqembu abesifazane — isamba, 2026 Q1">Women's-group participants — cumulative, 2026 Q1</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="intro">
+  <div class="wrap intro-block">
+    <p data-en="Riverkeep Trust works with the City of Rivermead on nature-based interventions along the Nkosana River — restoring riparian buffers, removing debris and invasive species, and rebuilding the wetland's capacity to absorb floodwater before it reaches homes downstream. The figures below come from our own field monitoring across five active sites and are updated quarterly."
+       data-zu="I-Riverkeep Trust isebenza ne-City of Rivermead ekwenzeni izinguquko ezisekelwe emvelweni ngasemfuleni i-Nkosana — ukubuyisela izindawo zasemfuleni, ukususa udoti nezimila ezingezona ezomdabu, nokwakha kabusha amandla exhaphosi okuvimbela amanzi ezikhukhula. Izibalo ezingezansi zivela ekulandeleleni kwethu kwasendaweni ezindaweni ezine ezisebenzayo.">
+      Riverkeep Trust works with the City of Rivermead on nature-based interventions along the Nkosana River — restoring riparian buffers, removing debris and invasive species, and rebuilding the wetland's capacity to absorb floodwater before it reaches homes downstream. The figures below come from our own field monitoring across four active sites and are updated quarterly.
+    </p>
+
+    <div class="map-card">
+      <h3 data-en="Where we work" data-zu="Lapho sisebenza khona" style="font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14.5px; color:var(--ink-soft); margin-bottom:12px;">Where we work</h3>
+      <div id="siteMap"></div>
+      <div class="map-legend">
+        <span><i style="background:#3E8E88;"></i> Flood Resilience site</span>
+        <span><i style="background:#7C8B5C;"></i> River Health site</span>
+        <span><i style="background:#A9613C;"></i> Community & Livelihoods site</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="theme-section">
+      <div class="theme-head">
+        <span class="theme-tag">01</span>
+        <h2 data-en="Flood Resilience" data-zu="Ukumelana Nezikhukhula">Flood Resilience</h2>
+      </div>
+      <p class="theme-why" data-en="Restored riparian corridors slow and absorb stormwater before it reaches low-lying homes. We track hectares restored and how far flood extent has actually receded at our two highest-risk sites."
+         data-zu="Izindawo zasemfuleni ezibuyiselwe zehlisa futhi zimunce amanzi ezikhukhula ngaphambi kokuba afinyelele emakhaya asezindaweni eziphansi.">
+        Restored riparian corridors slow and absorb stormwater before it reaches low-lying homes. We track hectares restored and how far flood extent has actually receded at our two highest-risk sites.
+      </p>
+      <div class="theme-grid">
+        <div class="card">
+          <h3 data-en="Riparian corridor restored (ha, cumulative)" data-zu="Indawo yasemfuleni ebuyiselwe (ha)">Riparian corridor restored (ha, cumulative)</h3>
+          <canvas id="chartFlood1" height="200"></canvas>
+        </div>
+        <div class="card">
+          <h3 data-en="By site — current quarter" data-zu="Ngendawo — ikota yamanje">By site — current quarter</h3>
+          <ul class="site-list">
+            <li><span><span class="dot"></span>Lower Nkosana Bend</span><span class="val">13.0 ha</span></li>
+            <li><span><span class="dot"></span>Millbrook Confluence</span><span class="val">10.2 ha</span></li>
+            <li><span><span class="dot"></span>Peak flood extent ↓</span><span class="val">142 → 98 ha</span></li>
+            <li><span><span class="dot"></span>Debris removed to date</span><span class="val">39 tons</span></li>
+          </ul>
+          <p class="caveat" data-en="Flood extent modelled from municipal rain-gauge data and site surveys; not a real-time feed." data-zu="Isibalo sezikhukhula sisuselwa emininingwaneni yesimo sezulu nokuhlolwa kwendawo.">Flood extent modelled from municipal rain-gauge data and site surveys; not a real-time feed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="theme-section">
+      <div class="theme-head">
+        <span class="theme-tag">02</span>
+        <h2 data-en="River Health" data-zu="Impilo Yomfula">River Health</h2>
+      </div>
+      <p class="theme-why" data-en="A healthier river means cleaner water and returning wildlife. Water quality and native species counts are the clearest signal that restoration is working, not just underway."
+         data-zu="Umfula ophile kangcono usho amanzi ahlanzekile nezilwane ezibuyayo.">
+        A healthier river means cleaner water and returning wildlife. Water quality and native species counts are the clearest signal that restoration is working, not just underway.
+      </p>
+      <div class="theme-grid">
+        <div class="card">
+          <h3 data-en="Water quality index, Willow Reach (0–100)" data-zu="Izinga lekhwalithi yamanzi (0–100)">Water quality index, Willow Reach (0–100)</h3>
+          <canvas id="chartRiver1" height="200"></canvas>
+        </div>
+        <div class="card">
+          <h3 data-en="Urban trees planted, cumulative" data-zu="Izihlahla ezitshaliwe">Urban trees planted, cumulative</h3>
+          <canvas id="chartRiver2" height="200"></canvas>
+        </div>
+      </div>
+      <p class="caveat" data-en="Native species counted via quarterly volunteer transect surveys at Willow Reach only; other sites pending baseline." data-zu="Izinhlobo zemvelo zibalwa nge-survey yamavolontiya ku-Willow Reach kuphela.">Native species counted via quarterly volunteer transect surveys at Willow Reach only; other sites pending baseline.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="theme-section">
+      <div class="theme-head">
+        <span class="theme-tag">03</span>
+        <h2 data-en="Community & Livelihoods" data-zu="Umphakathi Nezimpilo">Community & Livelihoods</h2>
+      </div>
+      <p class="theme-why" data-en="Restoration work is done by the community it protects. We track paid roles created and participation from women's groups leading planting and monitoring work."
+         data-zu="Umsebenzi wokubuyisela wenziwa umphakathi owuvikelayo.">
+        Restoration work is done by the community it protects. We track paid roles created and participation from women's groups leading planting and monitoring work.
+      </p>
+      <div class="theme-grid">
+        <div class="card">
+          <h3 data-en="Jobs created, fixed-term & temporary (cumulative)" data-zu="Imisebenzi edaliwe (isamba)">Jobs created, fixed-term & temporary (cumulative)</h3>
+          <canvas id="chartComm1" height="200"></canvas>
+        </div>
+        <div class="card">
+          <h3 data-en="Participants from women's groups (cumulative)" data-zu="Ababambe iqhaza amaqembu abesifazane (isamba)">Participants from women's groups (cumulative)</h3>
+          <canvas id="chartComm2" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="funders">
+  <div class="bi-section">
+    <div class="wrap">
+      <span class="theme-tag" style="color:#CE9A4A;">FOR FUNDERS &amp; PARTNERS</span>
+      <h2 style="margin-top:10px;">Explore the full indicator set</h2>
+      <p>The summary above covers our five headline indicators. For a filterable, site-by-site breakdown across all monitoring themes, the interactive report below is published from our Power BI workspace and updates each quarter.</p>
+      <div class="bi-embed-wrap">
+        <iframe title="RiverKeep dashboard"
+          src="https://app.powerbi.com/view?r=eyJrIjoiZDY4MjA4NDctMjY4MS00YzgxLTgxNTUtZmI4YzY4N2U5YzRiIiwidCI6IjE4ZGYxN2MyLWJlOGUtNDdjMi1iODA1LWYxZGIyMThjMTI2MyJ9&pageName=799ff9ccd53e83655114"
+          frameborder="0" allowFullScreen="true"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Riverkeep Trust — a fictional organization built as a portfolio demonstration.</span>
+    <span>Sample data · not a real conservation program</span>
+  </div>
+</footer>
+
+<script>
+let lang = 'en';
+document.getElementById('langBtn').addEventListener('click', () => {
+  lang = lang === 'en' ? 'zu' : 'en';
+  document.querySelectorAll('[data-en]').forEach(el => {
+    el.textContent = el.getAttribute('data-' + lang);
+  });
+});
+
+// Animated count-up, now triggered manually once real values are loaded from the CSV
+function animateStat(el, target, decimals){
+  const duration = 900;
+  const startTime = performance.now();
+  function tick(now){
+    const p = Math.min((now - startTime) / duration, 1);
+    const val = target * (1 - Math.pow(1 - p, 3));
+    el.textContent = decimals ? val.toFixed(decimals) : Math.round(val);
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// --- Data helpers, all operating on rows parsed straight from riverkeep_indicators.csv ---
+function sumByQuarter(rows, indicator, site){
+  const filtered = rows.filter(r => r.Indicator === indicator && (!site || r.Site === site));
+  const byQuarter = {};
+  filtered.forEach(r => { byQuarter[r.Quarter] = (byQuarter[r.Quarter] || 0) + r.Value; });
+  const labels = Object.keys(byQuarter).sort(); // "2024-Q1" < "2024-Q3" sorts correctly as text
+  return { labels, values: labels.map(q => byQuarter[q]) };
+}
+function valueAt(rows, indicator, site, quarter){
+  const row = rows.find(r => r.Indicator === indicator && r.Site === site && r.Quarter === quarter);
+  return row ? row.Value : null;
+}
+function latestQuarterFor(rows, indicator, site){
+  const matches = rows.filter(r => r.Indicator === indicator && (!site || r.Site === site));
+  const quarters = [...new Set(matches.map(r => r.Quarter))].sort();
+  return quarters[quarters.length - 1];
+}
+
+// Site color-by-theme is a presentation choice, not a data value, so it stays as small config here
+const themeColor = { "Flood Resilience": "#3E8E88", "River Health": "#7C8B5C", "Community & Livelihoods": "#A9613C" };
+
+fetch('./riverkeep_indicators.csv')
+  .then(res => {
+    if (!res.ok) throw new Error('CSV not found — see console note below.');
+    return res.text();
+  })
+  .then(csvText => {
+    const parsed = Papa.parse(csvText, { header: true, dynamicTyping: true, skipEmptyLines: true });
+    const rows = parsed.data;
+    buildDashboard(rows);
+  })
+  .catch(err => {
+    console.warn('[Riverkeep] Could not load riverkeep_indicators.csv via fetch(). ' +
+      'This page must be served over http(s):// — opening it directly as a local file (file://) blocks fetch() in most browsers. ' +
+      'Run a local server (e.g. `python3 -m http.server`) from this folder, or deploy it, then reload. Details:', err);
+  });
+
+function buildDashboard(rows){
+  // --- Hero stats ---
+  const riparianLatestQ = latestQuarterFor(rows, "Riparian corridor restored");
+  const riparianTotal = rows.filter(r => r.Indicator === "Riparian corridor restored" && r.Quarter === riparianLatestQ)
+                             .reduce((s, r) => s + r.Value, 0);
+
+  const floodBaseline = valueAt(rows, "Peak flood extent", "Millbrook Confluence", "2024-Q1");
+  const floodLatest = valueAt(rows, "Peak flood extent", "Millbrook Confluence", latestQuarterFor(rows, "Peak flood extent", "Millbrook Confluence"));
+  const floodPct = Math.round(((floodBaseline - floodLatest) / floodBaseline) * 100);
+
+  const treesQ = latestQuarterFor(rows, "Urban trees planted", "Willow Reach");
+  const treesTotal = valueAt(rows, "Urban trees planted", "Willow Reach", treesQ);
+
+  const jobsQ = latestQuarterFor(rows, "Jobs created (fixed term & temporary)", "Cutler's Ford");
+  const jobsTotal = valueAt(rows, "Jobs created (fixed term & temporary)", "Cutler's Ford", jobsQ);
+
+  const partQ = latestQuarterFor(rows, "Participants from women's groups", "Lower Nkosana Bend");
+  const partTotal = valueAt(rows, "Participants from women's groups", "Lower Nkosana Bend", partQ);
+
+  animateStat(document.getElementById('statRiparian'), riparianTotal, 1);
+  animateStat(document.getElementById('statFlood'), floodPct, 0);
+  animateStat(document.getElementById('statTrees'), treesTotal, 0);
+  animateStat(document.getElementById('statJobs'), jobsTotal, 0);
+  animateStat(document.getElementById('statParticipants'), partTotal, 0);
+
+  // --- Site map — sites, coordinates, and popup notes all derived from the CSV ---
+  const siteMap = {};
+  rows.forEach(r => {
+    if (!siteMap[r.Site]) siteMap[r.Site] = { lat: r.Latitude, lng: r.Longitude, themes: new Set() };
+    siteMap[r.Site].themes.add(r.Theme);
+  });
+
+  const map = L.map('siteMap', { scrollWheelZoom: false }).setView([-26.135, 28.055], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors', maxZoom: 18
+  }).addTo(map);
+
+  Object.entries(siteMap).forEach(([name, info]) => {
+    const primaryTheme = [...info.themes][0];
+    const siteRows = rows.filter(r => r.Site === name);
+    const latestBits = [...info.themes].map(theme => {
+      const themeRows = siteRows.filter(r => r.Theme === theme);
+      const indicatorNames = [...new Set(themeRows.map(r => r.Indicator))];
+      return indicatorNames.map(ind => {
+        const q = latestQuarterFor(rows, ind, name);
+        const v = valueAt(rows, ind, name, q);
+        const unit = themeRows.find(r => r.Indicator === ind).Unit;
+        return `${v} ${unit} — ${ind}`;
+      }).join(', ');
+    }).join(' · ');
+
+    const marker = L.circleMarker([info.lat, info.lng], {
+      radius: 10, fillColor: themeColor[primaryTheme] || '#3E8E88', color: '#F7F8F2',
+      weight: 2, opacity: 1, fillOpacity: 0.9
+    }).addTo(map);
+    marker.bindPopup(`<b>${name}</b><br>${[...info.themes].join(' · ')}<br>${latestBits}`);
+  });
+
+  // --- Charts ---
+  Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+  Chart.defaults.font.size = 11;
+  Chart.defaults.color = '#3C544C';
+  const gridColor = 'rgba(23,50,43,0.08)';
+  const teal = '#3E8E88', tealDeep = '#23615E', clay = '#A9613C', moss = '#7C8B5C';
+
+  function lineChart(ctx, labels, data, color, label){
+    return new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets: [{ label, data, borderColor: color, backgroundColor: color + '22',
+        fill: true, tension: 0.35, pointRadius: 3, pointBackgroundColor: color, borderWidth: 2.5 }] },
+      options: { responsive:true, plugins:{legend:{display:false}},
+        scales:{ x:{grid:{display:false}}, y:{grid:{color:gridColor}, beginAtZero:true} } }
+    });
+  }
+  function barChart(ctx, labels, data, color){
+    return new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ data, backgroundColor: color, borderRadius: 5, maxBarThickness: 34 }] },
+      options: { responsive:true, plugins:{legend:{display:false}},
+        scales:{ x:{grid:{display:false}}, y:{grid:{color:gridColor}, beginAtZero:true} } }
+    });
+  }
+
+  const flood1 = sumByQuarter(rows, "Riparian corridor restored");
+  const river1 = sumByQuarter(rows, "Water quality index", "Willow Reach");
+  const river2 = sumByQuarter(rows, "Urban trees planted", "Willow Reach");
+  const comm1 = sumByQuarter(rows, "Jobs created (fixed term & temporary)", "Cutler's Ford");
+  const comm2 = sumByQuarter(rows, "Participants from women's groups", "Lower Nkosana Bend");
+
+  lineChart(document.getElementById('chartFlood1'), flood1.labels, flood1.values, teal, 'ha restored');
+  barChart(document.getElementById('chartRiver1'), river1.labels, river1.values, tealDeep);
+  lineChart(document.getElementById('chartRiver2'), river2.labels, river2.values, moss, 'trees');
+  barChart(document.getElementById('chartComm1'), comm1.labels, comm1.values, clay);
+  lineChart(document.getElementById('chartComm2'), comm2.labels, comm2.values, clay, 'participants');
+}
+</script>
+
+</body>
+</html>
